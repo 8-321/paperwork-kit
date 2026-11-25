@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Allergen Matrix Maker — UK/EU 14 and US 9, print-ready</title>
+<meta name="description" content="Build a dish-by-dish allergen matrix for a café, bakery or food truck. UK/EU 14 allergens or US 9 majors, clear legend, contains summary, CSV export. No account, no upload.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23121624'/%3E%3Cpath d='M18 14h20l8 8v28H18z' fill='%23fff'/%3E%3Cpath d='M38 14v8h8' fill='%232f6fed'/%3E%3Cpath d='M24 30h16M24 36h16M24 42h10' stroke='%232f6fed' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+:root{--a:#d97706}
+.hd h1{font-size:30px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:620px){.two{grid-template-columns:1fr}}
+.gridwrap{overflow:auto;border-radius:10px;box-shadow:inset 0 0 0 1px #202632}
+.agrid{border-collapse:separate;border-spacing:0;font-size:11px;min-width:760px}
+.agrid th,.agrid td{padding:5px 4px;border-bottom:1px solid rgba(255,255,255,.05);text-align:center}
+.agrid th{position:sticky;top:0;background:#11141c;z-index:2;font-size:9px;color:var(--tx3);font-weight:600}
+.agrid th.nm,.agrid td.nm{text-align:left;position:sticky;left:0;background:#11141c;z-index:3;min-width:170px}
+.agrid input[type=text]{padding:6px 7px;font-size:12px}
+.agrid input[type=checkbox]{width:15px;height:15px;accent-color:#d97706}
+.agrid .del{border:0;background:transparent;color:var(--tx3);cursor:pointer;font-size:15px}
+.agrid .del:hover{color:var(--bad)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar .sp{flex:1}
+.paper-wrap{margin-top:4px}
+.sheet .am-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:8px;gap:14px}
+.sheet .am-title{font-size:21px;font-weight:700;letter-spacing:-.02em}
+.sheet .am-sub{font-size:10px;color:var(--ink2);margin-top:3px}
+.sheet .am-meta{font-size:10px;color:var(--ink2);text-align:right}
+.sheet .am-table{margin-top:12px;table-layout:fixed}
+.sheet .am-table th{padding:0;height:34mm;vertical-align:bottom;background:none;border-bottom:1.5px solid #b9c1cf;text-align:center}
+.sheet .am-table th .v{writing-mode:vertical-rl;transform:rotate(180deg);font-size:7.4px;letter-spacing:.02em;text-transform:none;color:#3a4356;white-space:nowrap;margin:0 auto 4px}
+.sheet .am-table td{text-align:center;padding:5px 2px;border-bottom:1px solid #e2e7f0;font-size:9px}
+.sheet .am-table td.dish{text-align:left;font-weight:600;font-size:9.5px;width:30%}
+.sheet .am-table .dot{font-size:10px;color:#111;font-weight:700}
+.sheet .am-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 12px;margin-top:10px;font-size:7.6px;color:#4c5568}
+.sheet .am-legend b{color:#141821}
+.sheet .contains{margin-top:12px;font-size:8.6px;line-height:1.55;color:#3a4356}
+.sheet .contains div{margin-bottom:2px}
+.sheet .am-note{margin-top:10px;font-size:8px;color:#6a7385}
+
+
+
+@media screen{.paper-wrap .sheet{zoom:.74}}
+@media screen and (max-width:1250px){.paper-wrap .sheet{zoom:.64}}
+@media screen and (max-width:900px){.paper-wrap .sheet{zoom:.5}}
+@media print{.paper-wrap .sheet{zoom:1!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../">← Paperwork Kit</a>
+    <span class="tag"><i></i>03 · Allergen Matrix</span>
+    <span class="sp"></span><span>Saved in this browser only</span>
+  </div>
+
+  <div class="grid">
+    <section class="app card pad">
+      <h2>Business</h2>
+      <div class="two">
+        <div><label class="f" for="biz">Business name</label><input type="text" id="biz" value="Harbour Kitchen"></div>
+        <div><label class="f" for="region">Allergen set</label><select id="region"><option value="uk">UK / EU — 14 allergens</option><option value="us">US — 9 major allergens</option></select></div>
+      </div>
+      <div class="two" style="margin-top:10px">
+        <div><label class="f" for="updated">Last reviewed</label><input type="date" id="updated"></div>
+        <div><label class="f" for="note">Footer note</label><input type="text" id="note" value="Please tell staff about any allergy before ordering. Recipes change; this matrix is reviewed with the menu."></div>
+      </div>
+
+      <div style="border-top:1px solid var(--line);margin:16px 0"></div>
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Dishes</h2>
+        <button class="btn ghost sm" id="addDish">+ Add dish</button>
+      </div>
+      <p class="note" style="margin:6px 0 10px">Tick every allergen a dish contains. A blank cell means “not used in this recipe” — never guess.</p>
+      <div class="gridwrap"><table class="agrid" id="agrid"></table></div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost sm" id="reset">Load sample</button>
+        <button class="btn ghost sm" id="csv">Download CSV</button>
+        <span class="sp" style="flex:1"></span>
+        <span class="note" id="hint"></span>
+      </div>
+    </section>
+
+    <section>
+      <div class="toolbar no-print">
+        <button class="btn" id="print">Print / Save as PDF</button>
+        <span class="sp"></span>
+        <span class="note" id="countHint"></span>
+      </div>
+      <div class="paper-wrap">
+        <div class="print-root">
+          <article class="sheet" id="sheet">
+            <div class="brandbar" style="background:#d97706"></div>
+            <div class="am-head">
+              <div><div class="am-title">Allergen Matrix</div><div class="am-sub" id="pvBiz">Harbour Kitchen</div></div>
+              <div class="am-meta">Reviewed <b id="pvUpdated"></b><br><span id="pvRegion"></span></div>
+            </div>
+            <table class="am-table" id="pvTable"></table>
+            <div class="am-legend" id="pvLegend"></div>
+            <div class="contains" id="pvContains"></div>
+            <div class="am-note" id="pvNote"></div>
+            <div class="foot"><span id="pvFoot"></span><span class="sp"></span><span>Page 1 of 1</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><span>Allergen matrix builder. Guidance only — verify recipes and local rules before publishing.</span><span class="sp"></span><a href="../">← All tools</a></footer>
+</div>
+<script src="../assets/base.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.T, $ = T.$;
+  var KEY = "pk.allergen.v1";
+  var SETS = {
+    uk: [
+      ["celery", "Celery"], ["gluten", "Cereals containing gluten"], ["crust", "Crustaceans"], ["egg", "Eggs"],
+      ["fish", "Fish"], ["lupin", "Lupin"], ["milk", "Milk"], ["mollusc", "Molluscs"], ["mustard", "Mustard"],
+      ["nuts", "Tree nuts"], ["peanut", "Peanuts"], ["sesame", "Sesame"], ["soy", "Soybeans"], ["sulphite", "Sulphites"]
+    ],
+    us: [
+      ["milk", "Milk"], ["egg", "Eggs"], ["fish", "Fish"], ["crust", "Crustacean shellfish"],
+      ["nuts", "Tree nuts"], ["peanut", "Peanuts"], ["wheat", "Wheat"], ["soy", "Soybeans"], ["sesame", "Sesame"]
+    ]
+  };
+  function today() { var d = new Date(); return d.toISOString().slice(0, 10); }
+
+  var SAMPLE = {
+    biz: "Harbour Kitchen", region: "uk", updated: today(), note: "Please tell staff about any allergy before ordering. Recipes change; this matrix is reviewed with the menu.",
+    dishes: [
+      { name: "Sourdough toast", has: ["gluten"] },
+      { name: "Buttermilk pancakes", has: ["gluten", "egg", "milk"] },
+      { name: "Fish pie", has: ["fish", "milk", "gluten", "mustard"] },
+      { name: "Vegan brownie", has: ["gluten", "soy"] },
+      { name: "House salad", has: ["mustard", "sulphite"] },
+      { name: "Chicken curry", has: ["milk", "mustard"] },
+      { name: "Tomato soup", has: ["celery", "gluten"] },
+      { name: "Chocolate cake", has: ["gluten", "egg", "milk", "soy"] }
+    ]
+  };
+  var st = load();
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function load() {
+    try { var r = localStorage.getItem(KEY); if (r) { var s = JSON.parse(r); if (s && s.dishes) return s; } } catch (e) {}
+    return clone(SAMPLE);
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+
+  function renderGrid() {
+    var set = SETS[st.region], t = $("#agrid");
+    var head = "<thead><tr><th class='nm'>Dish</th>";
+    set.forEach(function (a) { head += "<th title='" + T.esc(a[1]) + "'>" + T.esc(a[1].split(" ")[0]) + "</th>"; });
+    head += "<th></th></tr></thead>";
+    var body = "<tbody>";
+    st.dishes.forEach(function (d, i) {
+      body += "<tr><td class='nm'><input type='text' data-i='" + i + "' data-k='name' value='" + T.esc(d.name) + "'></td>";
+      set.forEach(function (a) {
+        var on = d.has.indexOf(a[0]) >= 0;
+        body += "<td><input type='checkbox' data-i='" + i + "' data-a='" + a[0] + "'" + (on ? " checked" : "") + "></td>";
+      });
+      body += "<td><button class='del' data-del='" + i + "' title='Remove dish'>×</button></td></tr>";
+    });
+    body += "</tbody>";
+    t.innerHTML = head + body;
+  }
+
+  function renderSheet() {
+    var set = SETS[st.region];
+    $("#pvBiz").textContent = st.biz || "Allergen matrix";
+    $("#pvUpdated").textContent = st.updated || "—";
+    $("#pvRegion").textContent = st.region === "uk" ? "UK / EU 14 allergens" : "US 9 major allergens";
+    var t = $("#pvTable");
+    var head = "<thead><tr><th style='width:30%'>Dish</th>";
+    set.forEach(function (a) { head += "<th><div class='v'>" + T.esc(a[1]) + "</div></th>"; });
+    head += "</tr></thead><tbody>";
+    var contains = [];
+    st.dishes.forEach(function (d) {
+      head += "<tr><td class='dish'>" + T.esc(d.name || "—") + "</td>";
+      var names = [];
+      set.forEach(function (a) {
+        var on = d.has.indexOf(a[0]) >= 0;
+        head += "<td>" + (on ? "<span class='dot'>●</span>" : "") + "</td>";
+        if (on) names.push(a[1]);
+      });
+      head += "</tr>";
+      contains.push("<div><b>" + T.esc(d.name || "—") + ":</b> " + (names.length ? T.esc(names.join(", ")) : "no declared allergens in this set") + "</div>");
+    });
+    head += "</tbody>";
+    t.innerHTML = head;
+    var lg = "";
+    set.forEach(function (a) { lg += "<div><b>●</b> " + T.esc(a[1]) + "</div>"; });
+    $("#pvLegend").innerHTML = lg;
+    $("#pvContains").innerHTML = "<div style='font-weight:700;margin-bottom:4px'>Contains, by dish</div>" + contains.join("");
+    $("#pvNote").textContent = st.note || "";
+    $("#pvFoot").textContent = (st.biz || "") + " · allergen matrix · " + (st.updated || "");
+    $("#countHint").textContent = st.dishes.length + " dishes × " + set.length + " allergens";
+    document.title = "Allergen Matrix — " + (st.biz || "");
+  }
+
+  function renderAll() { renderGrid(); renderSheet(); }
+
+  function bind(id, key) {
+    var el = document.getElementById(id);
+    el.value = st[key] == null ? "" : st[key];
+    el.addEventListener("input", function () { st[key] = el.value; save(); renderSheet(); });
+    el.addEventListener("change", function () { st[key] = el.value; save(); renderSheet(); });
+  }
+  bind("biz", "biz"); bind("updated", "updated"); bind("note", "note");
+  $("#region").value = st.region;
+  $("#region").addEventListener("change", function (e) {
+    st.region = e.target.value; save(); renderAll();
+  });
+
+  $("#agrid").addEventListener("input", function (e) {
+    var el = e.target, i = el.getAttribute("data-i");
+    if (i == null) return;
+    if (el.getAttribute("data-k") === "name") st.dishes[+i].name = el.value;
+    save(); renderSheet();
+  });
+  $("#agrid").addEventListener("change", function (e) {
+    var el = e.target, i = el.getAttribute("data-i"), a = el.getAttribute("data-a");
+    if (i == null || !a || el.type !== "checkbox") return;
+    var d = st.dishes[+i], k = d.has.indexOf(a);
+    if (el.checked && k < 0) d.has.push(a);
+    if (!el.checked && k >= 0) d.has.splice(k, 1);
+    save(); renderSheet();
+  });
+  $("#agrid").addEventListener("click", function (e) {
+    var d = e.target.getAttribute("data-del");
+    if (d == null) return;
+    if (st.dishes.length <= 1) { T.toast("Keep at least one dish"); return; }
+    st.dishes.splice(+d, 1); save(); renderAll();
+  });
+  $("#addDish").addEventListener("click", function () {
+    st.dishes.push({ name: "New dish", has: [] }); save(); renderAll();
+    var inputs = document.querySelectorAll("#agrid input[data-k='name']");
+    if (inputs.length) { inputs[inputs.length - 1].focus(); inputs[inputs.length - 1].select(); }
+  });
+  $("#reset").addEventListener("click", function () {
+    st = clone(SAMPLE); st.updated = today(); save();
+    $("#biz").value = st.biz; $("#region").value = st.region; $("#updated").value = st.updated; $("#note").value = st.note;
+    renderAll(); T.toast("Sample loaded");
+  });
+  $("#print").addEventListener("click", function () { window.print(); });
+  $("#csv").addEventListener("click", function () {
+    var set = SETS[st.region];
+    var rows = [["dish"].concat(set.map(function (a) { return a[1]; }))];
+    st.dishes.forEach(function (d) { rows.push([d.name].concat(set.map(function (a) { return d.has.indexOf(a[0]) >= 0 ? "1" : "0"; }))); });
+    T.download("allergen-matrix.csv", rows.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n"), "text/csv;charset=utf-8");
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

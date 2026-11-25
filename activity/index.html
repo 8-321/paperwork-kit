@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KDP Activity Book Builder — mazes, word search and sudoku</title>
+<meta name="description" content="Assemble a print-ready 8.5x11 children’s activity book: mazes with solutions, themed word searches and sudoku. Answer keys at the back. No account, no upload.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23121624'/%3E%3Cpath d='M18 14h20l8 8v28H18z' fill='%23fff'/%3E%3Cpath d='M38 14v8h8' fill='%232f6fed'/%3E%3Cpath d='M24 30h16M24 36h16M24 42h10' stroke='%232f6fed' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+:root{--a:#7c3aed}
+.hd h1{font-size:30px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.two,.three{grid-template-columns:1fr}}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar .sp{flex:1}
+.paper-wrap{margin-top:4px}
+.sheet.book{position:relative;width:8.5in;height:11in;padding:.45in .5in .5in;font-size:11px;overflow:hidden}
+
+.book-title{font-size:16px;font-weight:700;text-align:center;letter-spacing:-.01em;margin:0 auto 4px;width:max-content;border-bottom:3px solid #7c3aed;padding-bottom:3px}
+.book-sub{font-size:9px;color:var(--ink2);text-align:center;margin-bottom:12px}
+.cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:8.9in}
+.cover h1{font-size:34px;line-height:1.08;max-width:6.2in;margin:0;border-bottom:4px solid #7c3aed;padding-bottom:10px}
+.cover .sub{font-size:14px;color:var(--ink2);margin-top:12px;max-width:5in}
+.cover .box{margin-top:26px;border:2px solid var(--ink);border-radius:10px;padding:16px 26px;font-size:12px}
+.cover .box span{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#7c8598;margin-bottom:8px}
+.cover .line{width:3.6in;border-bottom:1px solid #8a93a3;height:20px}
+.cover .icons{display:flex;gap:14px;margin-top:30px}
+.cover .icons div{width:54px;height:54px;border-radius:12px;background:#f0ecff;display:flex;align-items:center;justify-content:center;font-size:24px}
+.maze-wrap{width:100%;max-width:6.4in;margin:6px auto 0}
+.maze-wrap svg{width:100%;height:auto;display:block}
+.maze-meta{display:flex;justify-content:space-between;font-size:9px;color:var(--ink2);margin:4px 2px}
+.ws-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:1px;width:6.2in;margin:10px auto 0;background:#c9d0dd;border:1px solid #9aa3b3;padding:1px}
+.ws-grid .c{background:#fff;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font:13px/1 "Consolas","Courier New",monospace;font-weight:600}
+.ws-grid .c.hit{background:#eee6ff;text-decoration:underline;text-underline-offset:2px}
+.ws-words{display:grid;grid-template-columns:repeat(4,1fr);gap:3px 12px;margin:12px auto 0;width:6.2in;font:10px/1.4 "Consolas",monospace;text-transform:uppercase}
+.sudoku{width:6.2in;margin:10px auto 0;border-collapse:collapse;table-layout:fixed}
+.sudoku td{width:calc(100%/9);aspect-ratio:1;border:1px solid #9aa3b3;text-align:center;vertical-align:middle;font:17px/1 "Segoe UI",Arial,sans-serif;font-weight:600;padding:0}
+.sudoku td.bt{border-top:2.5px solid #141821}
+.sudoku td.bb{border-bottom:2.5px solid #141821}
+.sudoku td.bl{border-left:2.5px solid #141821}
+.sudoku td.br{border-right:2.5px solid #141821}
+.sudoku td.given{color:#141821}
+.sudoku td.sol{color:#7c3aed}
+.sudoku-pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.sudoku-pair .sudoku{width:3.6in}
+.sudoku-pair h3{font-size:10px;text-align:center;margin:0 0 4px;color:#4c5568}
+.answer-label{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#7c8598;text-align:center;margin:6px 0 2px}
+
+
+@media print{.sheet.book{width:auto!important;height:auto!important;min-height:0!important;padding:0!important;overflow:visible;page-break-after:auto;break-after:auto}.pb{height:0;page-break-after:always;break-after:page}.cover{min-height:8.4in}.ws-grid .c{break-inside:avoid}}
+
+@media screen{.paper-wrap .sheet{zoom:.74}}
+@media screen and (max-width:1250px){.paper-wrap .sheet{zoom:.64}}
+@media screen and (max-width:900px){.paper-wrap .sheet{zoom:.5}}
+@media print{.paper-wrap .sheet{zoom:1!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../">← Paperwork Kit</a>
+    <span class="tag"><i></i>04 · KDP Activity Book</span>
+    <span class="sp"></span><span>8.5 × 11 in · answer keys included</span>
+  </div>
+
+  <div class="grid">
+    <section class="app card pad">
+      <h2>Book setup</h2>
+      <div><label class="f" for="title">Book title</label><input type="text" id="title" value="The Big Puzzle Adventure"></div>
+      <div style="margin-top:10px"><label class="f" for="subtitle">Subtitle</label><input type="text" id="subtitle" value="Mazes, word searches and sudoku for ages 6–9"></div>
+      <div class="two" style="margin-top:10px">
+        <div><label class="f" for="theme">Word search theme</label><select id="theme"><option value="animals">Animals</option><option value="space">Space</option><option value="ocean">Ocean</option><option value="dinosaurs">Dinosaurs</option><option value="food">Food</option></select></div>
+        <div><label class="f" for="difficulty">Sudoku level</label><select id="difficulty"><option value="easy">Easy (40 clues)</option><option value="medium">Medium (32 clues)</option></select></div>
+      </div>
+      <div class="three" style="margin-top:10px">
+        <div><label class="f" for="mazes">Mazes</label><input type="number" id="mazes" value="3" min="0" max="10"></div>
+        <div><label class="f" for="words">Word searches</label><input type="number" id="words" value="3" min="0" max="10"></div>
+        <div><label class="f" for="sudoku">Sudoku</label><input type="number" id="sudoku" value="2" min="0" max="4"></div>
+      </div>
+      <div class="two" style="margin-top:10px">
+        <div><label class="f" for="seed">Seed (same seed = same book)</label><input type="text" id="seed" value="book-001"></div>
+        <div><label class="f" for="author">Author / imprint (optional)</label><input type="text" id="author" value=""></div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="build">Build book</button>
+        <button class="btn ghost sm" id="regen">New seed</button>
+        <button class="btn ghost sm" id="print">Print / Save as PDF</button>
+      </div>
+      <p class="note" style="margin-top:10px">Print at 100% / “Actual size”, US Letter, margins “Default”. The PDF page size is already 8.5 × 11 in. Answer keys are at the back.</p>
+      <p class="note" style="margin-top:10px"><b>KDP tip:</b> for a paperback interior use 0.5 in margins or more, no bleed for this layout, and keep the page count even (add a blank page if needed).</p>
+    </section>
+
+    <section>
+      <div class="toolbar no-print"><span class="note" id="hint"></span></div>
+      <div class="paper-wrap"><div class="print-root" id="book"></div></div>
+    </section>
+  </div>
+
+  <footer><span>Activity book builder · mazes, word searches and curated sudoku. No network, no account.</span><span class="sp"></span><a href="../">← All tools</a></footer>
+</div>
+<script src="../assets/base.js"></script>
+<script src="sudoku.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.T, $ = T.$;
+  var KEY = "pk.activity.v1";
+  var THEMES = {
+    animals: ["TIGER","ELEPHANT","GIRAFFE","MONKEY","RABBIT","PANDA","ZEBRA","DOLPHIN","PENGUIN","KOALA"],
+    space: ["ROCKET","PLANET","COMET","GALAXY","MOON","STAR","ORBIT","NEBULA","METEOR","SATURN"],
+    ocean: ["DOLPHIN","OCTOPUS","CORAL","SHARK","TURTLE","WHALE","SEAWEED","PEARL","WAVES","CRAB"],
+    dinosaurs: ["RAPTOR","FOSSIL","TRIASSIC","JURASSIC","STEGOSAURUS","TRICERATOPS","PTERODACTYL","VOLCANO","BONES","EGGS"],
+    food: ["APPLE","BANANA","CARROT","CHEESE","BREAD","MANGO","ORANGE","TOMATO","HONEY","LEMON"]
+  };
+  var cfg = load();
+  function load() {
+    try { var r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch (e) {}
+    return { title: "The Big Puzzle Adventure", subtitle: "Mazes, word searches and sudoku for ages 6–9", theme: "animals", difficulty: "easy", mazes: 3, words: 3, sudoku: 2, seed: "book-001", author: "" };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} }
+  function hash(s) { var h = 2166136261 >>> 0; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function rng(seed) { var a = seed >>> 0; return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function ri(r, a, b) { return a + Math.floor(r() * (b - a + 1)); }
+  function pick(r, arr) { return arr[Math.floor(r() * arr.length)]; }
+  function esc(s) { return T.esc(s); }
+
+  function makeMaze(cols, rows, r) {
+    var cells = [], i;
+    for (i = 0; i < cols * rows; i++) cells.push({ n: 1, e: 1, s: 1, w: 1, v: 0 });
+    var idx = function (x, y) { return y * cols + x; };
+    var stack = [0]; cells[0].v = 1;
+    while (stack.length) {
+      var cur = stack[stack.length - 1], x = cur % cols, y = (cur - x) / cols;
+      var nb = [];
+      if (y > 0 && !cells[idx(x, y - 1)].v) nb.push([x, y - 1, "n"]);
+      if (x < cols - 1 && !cells[idx(x + 1, y)].v) nb.push([x + 1, y, "e"]);
+      if (y < rows - 1 && !cells[idx(x, y + 1)].v) nb.push([x, y + 1, "s"]);
+      if (x > 0 && !cells[idx(x - 1, y)].v) nb.push([x - 1, y, "w"]);
+      if (!nb.length) { stack.pop(); continue; }
+      var p = pick(r, nb), nx = p[0], ny = p[1], dir = p[2], ni = idx(nx, ny);
+      if (dir === "n") { cells[cur].n = 0; cells[ni].s = 0; }
+      if (dir === "s") { cells[cur].s = 0; cells[ni].n = 0; }
+      if (dir === "e") { cells[cur].e = 0; cells[ni].w = 0; }
+      if (dir === "w") { cells[cur].w = 0; cells[ni].e = 0; }
+      cells[ni].v = 1; stack.push(ni);
+    }
+    return cells;
+  }
+
+  function mazeSVG(cols, rows, cells, path) {
+    var W = cols * 2 + 1, H = rows * 2 + 1, d = [];
+    function line(x1, y1, x2, y2) { d.push("M" + x1 + " " + y1 + "L" + x2 + " " + y2); }
+    for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) {
+      var c = cells[y * cols + x], X = x * 2, Y = y * 2;
+      if (c.n && !(x === 0 && y === 0)) line(X, Y, X + 2, Y);
+      if (c.w) line(X, Y, X, Y + 2);
+      if (x === cols - 1 && c.e) line(X + 2, Y, X + 2, Y + 2);
+      if (y === rows - 1 && c.s && !(x === cols - 1)) line(X, Y + 2, X + 2, Y + 2);
+    }
+    var out = '<svg viewBox="0 -1.9 ' + W + " " + (H + 3.2) + '" xmlns="http://www.w3.org/2000/svg">';
+    out += '<path d="' + d.join("") + '" fill="none" stroke="#141821" stroke-width="0.14" stroke-linecap="square"/>';
+    if (path && path.length) {
+      var pts = path.map(function (p) { return (p[0] * 2 + 1) + "," + (p[1] * 2 + 1); }).join(" ");
+      out += '<polyline points="' + pts + '" fill="none" stroke="#7c3aed" stroke-width="0.22" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.5 0.35"/>';
+    }
+    out += '<text x="1" y="-0.5" font-size="0.72" font-family="Segoe UI,Arial" font-weight="700" fill="#141821">START</text>';
+    out += '<text x="' + (W - 1) + '" y="' + (H + 1.15) + '" text-anchor="end" font-size="0.72" font-family="Segoe UI,Arial" font-weight="700" fill="#141821">FINISH</text>';
+    out += "</svg>";
+    return out;
+  }
+
+  function solveMaze(cols, rows, cells) {
+    var seen = {}, q = [[0, 0, [[0, 0]]]], head = 0;
+    seen["0,0"] = 1;
+    while (head < q.length) {
+      var cur = q[head++], x = cur[0], y = cur[1], path = cur[2];
+      if (x === cols - 1 && y === rows - 1) return path;
+      var c = cells[y * cols + x];
+      var moves = [];
+      if (!c.n && y > 0) moves.push([x, y - 1]);
+      if (!c.s && y < rows - 1) moves.push([x, y + 1]);
+      if (!c.e && x < cols - 1) moves.push([x + 1, y]);
+      if (!c.w && x > 0) moves.push([x - 1, y]);
+      for (var i = 0; i < moves.length; i++) {
+        var k = moves[i][0] + "," + moves[i][1];
+        if (seen[k]) continue;
+        seen[k] = 1;
+        q.push([moves[i][0], moves[i][1], path.concat([moves[i]])]);
+      }
+    }
+    return [];
+  }
+
+  function makeWordSearch(size, words, r) {
+    var g = [], y, x;
+    for (y = 0; y < size; y++) { g.push([]); for (x = 0; x < size; x++) g[y].push(""); }
+    var dirs = [[1,0],[0,1],[1,1],[-1,1],[-1,0],[0,-1],[-1,-1],[1,-1]];
+    var placed = [];
+    words.forEach(function (w) {
+      var ok = false;
+      for (var attempt = 0; attempt < 400 && !ok; attempt++) {
+        var d = pick(r, dirs), dx = d[0], dy = d[1];
+        var sx = ri(r, 0, size - 1), sy = ri(r, 0, size - 1);
+        var ex = sx + dx * (w.length - 1), ey = sy + dy * (w.length - 1);
+        if (ex < 0 || ex >= size || ey < 0 || ey >= size) continue;
+        var fits = true, cells = [];
+        for (var i = 0; i < w.length; i++) {
+          var cx = sx + dx * i, cy = sy + dy * i, ch = g[cy][cx];
+          if (ch && ch !== w[i]) { fits = false; break; }
+          cells.push([cx, cy]);
+        }
+        if (!fits) continue;
+        for (var j = 0; j < w.length; j++) g[cells[j][1]][cells[j][0]] = w[j];
+        placed.push({ word: w, cells: cells });
+        ok = true;
+      }
+    });
+    var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (y = 0; y < size; y++) for (x = 0; x < size; x++) if (!g[y][x]) g[y][x] = alphabet[ri(r, 0, 25)];
+    return { grid: g, placed: placed };
+  }
+
+  function wsHTML(ws, hit) {
+    var h = '<div class="ws-grid">';
+    for (var y = 0; y < ws.grid.length; y++) for (var x = 0; x < ws.grid.length; x++) {
+      var isHit = false;
+      if (hit) ws.placed.forEach(function (p) { p.cells.forEach(function (c) { if (c[0] === x && c[1] === y) isHit = true; }); });
+      h += '<div class="c' + (isHit ? " hit" : "") + '">' + ws.grid[y][x] + "</div>";
+    }
+    return h + "</div>";
+  }
+
+  function sudokuHTML(puz, sol, showSol) {
+    var h = '<table class="sudoku"><tbody>';
+    for (var r = 0; r < 9; r++) {
+      h += "<tr>";
+      for (var c = 0; c < 9; c++) {
+        var v = showSol ? sol[r * 9 + c] : puz[r * 9 + c];
+        var cls = [];
+        if (r % 3 === 0 && r > 0) cls.push("bt");
+        if (r === 8) cls.push("bb");
+        if (c % 3 === 0 && c > 0) cls.push("bl");
+        if (c === 8) cls.push("br");
+        if (showSol) cls.push("sol"); else if (v) cls.push("given");
+        h += '<td class="' + cls.join(" ") + '">' + (v || "") + "</td>";
+      }
+      h += "</tr>";
+    }
+    return h + "</tbody></table>";
+  }
+
+  function page(inner, num, title) {
+    return '<article class="sheet book">' + inner +
+      '<div class="foot"><span>' + esc(title) + '</span><span class="sp"></span><span>Page ' + num + "</span></div></article>";
+  }
+
+  function buildBook() {
+    var r = rng(hash(cfg.title + "|" + cfg.theme + "|" + cfg.seed + "|" + cfg.mazes + "|" + cfg.words + "|" + cfg.sudoku + "|" + cfg.difficulty));
+    var pages = [], mazes = [], searches = [], suds = [], i;
+    var title = cfg.title || "Activity Book";
+    var themeWords = (THEMES[cfg.theme] || THEMES.animals).slice();
+
+    pages.push('<article class="sheet book"><div class="cover">' +
+      '<h1>' + esc(title) + "</h1>" +
+      '<div class="sub">' + esc(cfg.subtitle || "") + "</div>" +
+      '<div class="icons"><div>▦</div><div>A</div><div>9</div></div>' +
+      '<div class="box"><span>This book belongs to</span><div class="line"></div></div>' +
+      (cfg.author ? '<div style="margin-top:26px;font-size:10px;color:#6a7385">' + esc(cfg.author) + "</div>" : "") +
+      '</div><div class="foot"><span>' + esc(title) + '</span><span class="sp"></span><span>Page 1</span></div></article>');
+
+    for (i = 0; i < Number(cfg.mazes); i++) {
+      var cells = makeMaze(10, 12, r);
+      var path = solveMaze(10, 12, cells);
+      mazes.push({ cells: cells, path: path });
+      pages.push(page('<div class="book-title">Maze ' + (i + 1) + '</div><div class="book-sub">Start at the top left. Find the way out at the bottom right.</div>' +
+        '<div class="maze-wrap">' + mazeSVG(10, 12, cells, null) + '</div>', pages.length + 1, title));
+    }
+    for (i = 0; i < Number(cfg.words); i++) {
+      var words = themeWords.slice().sort(function () { return r() - 0.5; }).slice(0, 8).map(function (w) { return w.toUpperCase(); });
+      var ws = makeWordSearch(12, words, r);
+      searches.push({ ws: ws, words: words });
+      pages.push(page('<div class="book-title">Word search ' + (i + 1) + '</div><div class="book-sub">Find all ' + words.length + " words. They can go across, down or diagonally.</div>" +
+        wsHTML(ws, false) + '<div class="ws-words">' + words.map(function (w) { return "<div>" + w + "</div>"; }).join("") + "</div>", pages.length + 1, title));
+    }
+    var pools = window.SUDOKU.filter(function (x) { return x.d === cfg.difficulty; });
+    if (!pools.length) pools = window.SUDOKU.slice();
+    for (i = 0; i < Number(cfg.sudoku); i++) {
+      var s = pools[ri(r, 0, pools.length - 1)];
+      suds.push(s);
+      pages.push(page('<div class="book-title">Sudoku ' + (i + 1) + '</div><div class="book-sub">Fill each row, column and 3×3 box with 1–9. Each number appears once.</div>' +
+        sudokuHTML(s.p, s.s, false), pages.length + 1, title));
+    }
+
+    if (mazes.length) pages.push(page('<div class="ans-title" style="font-size:20px;font-weight:700">Maze solutions</div><div class="book-sub">For grown-ups, or for a very stuck explorer.</div>' +
+      '<div class="maze-wrap">' + mazeSVG(10, 12, mazes[0].cells, mazes[0].path) + "</div>", pages.length + 1, title + " · answers"));
+    for (i = 1; i < mazes.length; i++) pages.push(page('<div class="book-title">Maze ' + (i + 1) + ' — solution</div><div class="maze-wrap">' + mazeSVG(10, 12, mazes[i].cells, mazes[i].path) + "</div>", pages.length + 1, title + " · answers"));
+    for (i = 0; i < searches.length; i++) pages.push(page('<div class="book-title">Word search ' + (i + 1) + ' — answers</div><div class="book-sub">The found words are underlined.</div>' + wsHTML(searches[i].ws, true) + '<div class="ws-words">' + searches[i].words.map(function (w) { return "<div>" + w + "</div>"; }).join("") + "</div>", pages.length + 1, title + " · answers"));
+    for (i = 0; i < suds.length; i += 2) {
+      var two = suds.slice(i, i + 2), inner = '<div class="book-title">Sudoku solutions</div><div class="sudoku-pair">';
+      two.forEach(function (s, j) { inner += "<div><h3>Puzzle " + (i + j + 1) + "</h3>" + sudokuHTML(s.p, s.s, true) + "</div>"; });
+      inner += "</div>";
+      pages.push(page(inner, pages.length + 1, title + " · answers"));
+    }
+
+    $("#book").innerHTML = pages.join('<div class="pb"></div>');
+    $("#hint").textContent = pages.length + " pages · " + cfg.mazes + " mazes · " + cfg.words + " word searches · " + cfg.sudoku + " sudoku · seed " + cfg.seed;
+    document.title = title + " — activity book";
+  }
+
+  function bind(id, key, isNum) {
+    var el = document.getElementById(id);
+    el.value = cfg[key] == null ? "" : cfg[key];
+    el.addEventListener("input", function () {
+      cfg[key] = isNum ? Math.max(0, Math.min(10, Number(el.value) || 0)) : el.value;
+      save();
+      if (isNum) buildBook();
+    });
+    el.addEventListener("change", function () { cfg[key] = isNum ? Number(el.value) : el.value; save(); buildBook(); });
+  }
+  bind("title", "title"); bind("subtitle", "subtitle"); bind("theme", "theme"); bind("difficulty", "difficulty");
+  bind("mazes", "mazes", true); bind("words", "words", true); bind("sudoku", "sudoku", true); bind("seed", "seed"); bind("author", "author");
+  $("#build").addEventListener("click", function () { save(); buildBook(); T.toast("Book rebuilt"); });
+  $("#regen").addEventListener("click", function () { cfg.seed = "book-" + Math.random().toString(36).slice(2, 7); $("#seed").value = cfg.seed; save(); buildBook(); });
+  $("#print").addEventListener("click", function () { window.print(); });
+  var st = document.getElementById("pageStyle");
+  if (!st) { st = document.createElement("style"); st.id = "pageStyle"; document.head.appendChild(st); }
+  st.textContent = "@page{size:letter;margin:0.5in}";
+  buildBook();
+})();
+</script>
+</body>
+</html>
+

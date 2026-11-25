@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Invoice &amp; Quote Maker — print-ready PDF, VAT and sales tax</title>
+<meta name="description" content="Turn a job into a print-ready invoice or quotation. VAT, US sales tax or none, calculated per line. GBP, USD, EUR, AUD, CAD. A4 or US Letter. No account, no upload.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23121624'/%3E%3Cpath d='M18 14h20l8 8v28H18z' fill='%23fff'/%3E%3Cpath d='M38 14v8h8' fill='%232f6fed'/%3E%3Cpath d='M24 30h16M24 36h16M24 42h10' stroke='%232f6fed' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+:root{--a:#2f6fed}
+.app{min-width:0}
+.hd h1{font-size:30px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.two,.three{grid-template-columns:1fr}}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:minmax(0,1fr) 62px 86px 62px 30px;gap:6px;align-items:center}
+.item input{padding:7px 8px;font-size:12.5px}
+.item .x{border:0;background:transparent;color:var(--tx3);font-size:16px;cursor:pointer;line-height:1}
+.item .x:hover{color:var(--bad)}
+.itemhead{display:grid;grid-template-columns:minmax(0,1fr) 62px 86px 62px 30px;gap:6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3);margin-bottom:2px}
+.itemhead span:nth-child(2),.itemhead span:nth-child(3),.itemhead span:nth-child(4){text-align:right}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar .sp{flex:1}
+.paper-wrap{margin-top:4px}
+
+
+.sheet .inv-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.sheet .kind{font-size:30px;letter-spacing:.12em;font-weight:800;color:var(--brand)}
+.sheet .meta{text-align:right;font-size:10.5px;color:var(--ink2);line-height:1.7}
+.sheet .meta b{color:var(--ink)}
+.sheet .parties{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0 16px}
+.sheet .party{font-size:10.8px;line-height:1.5}
+.sheet .party .lbl{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#7c8598;margin-bottom:3px}
+.sheet .party b{font-size:12px}
+.sheet .words{font-size:10px;color:var(--ink2);margin-top:10px;font-style:italic}
+.sheet .pay{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;font-size:9.8px;color:var(--ink2)}
+.sheet .pay b{display:block;color:var(--ink);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.sheet .items-table td:first-child{width:52%}
+
+@media screen{.paper-wrap .sheet{zoom:.74}}
+@media screen and (max-width:1250px){.paper-wrap .sheet{zoom:.64}}
+@media screen and (max-width:900px){.paper-wrap .sheet{zoom:.5}}
+@media print{.paper-wrap .sheet{zoom:1!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../">← Paperwork Kit</a>
+    <span class="tag"><i></i>01 · Invoice &amp; Quote</span>
+    <span class="sp"></span>
+    <span>Saved in this browser only</span>
+  </div>
+
+  <div class="grid">
+    <section class="app card pad">
+      <h2>Document</h2>
+      <div class="two">
+        <div><label class="f" for="kind">Document type</label><select id="kind"><option value="invoice">Invoice</option><option value="quote">Quotation</option></select></div>
+        <div><label class="f" for="currency">Currency</label><select id="currency"><option value="GBP">GBP — £</option><option value="USD">USD — $</option><option value="EUR">EUR — €</option><option value="AUD">AUD — A$</option><option value="CAD">CAD — C$</option></select></div>
+      </div>
+      <div class="three" style="margin-top:10px">
+        <div><label class="f" for="number">Number</label><input type="text" id="number" value="INV-2026-014"></div>
+        <div><label class="f" for="issue">Issue date</label><input type="date" id="issue"></div>
+        <div><label class="f" for="days">Payment terms (days)</label><input type="number" id="days" value="14" min="0" max="365"></div>
+      </div>
+      <div class="three" style="margin-top:10px">
+        <div><label class="f" for="taxMode">Tax mode</label><select id="taxMode"><option value="vat">VAT (UK/EU)</option><option value="sales_tax">Sales tax (US)</option><option value="none">No tax</option></select></div>
+        <div><label class="f" for="taxRate">Default rate %</label><input type="number" id="taxRate" value="20" min="0" max="100" step="0.01"></div>
+        <div><label class="f" for="discount">Discount %</label><input type="number" id="discount" value="0" min="0" max="100" step="0.5"></div>
+      </div>
+
+      <div class="rule" style="border-top:1px solid var(--line);margin:16px 0"></div>
+      <h2>Seller</h2>
+      <div class="two">
+        <div><label class="f" for="sName">Trading name</label><input type="text" id="sName"></div>
+        <div><label class="f" for="sEmail">Email</label><input type="text" id="sEmail"></div>
+      </div>
+      <div style="margin-top:10px"><label class="f" for="sAddr">Address</label><input type="text" id="sAddr"></div>
+      <div class="two" style="margin-top:10px">
+        <div><label class="f" for="sTax">VAT / tax ID</label><input type="text" id="sTax"></div>
+        <div><label class="f" for="sBank">Bank / payment details</label><input type="text" id="sBank"></div>
+      </div>
+
+      <div class="rule" style="border-top:1px solid var(--line);margin:16px 0"></div>
+      <h2>Client</h2>
+      <div class="two">
+        <div><label class="f" for="cName">Client name</label><input type="text" id="cName"></div>
+        <div><label class="f" for="cTax">VAT / tax ID (optional)</label><input type="text" id="cTax"></div>
+      </div>
+      <div style="margin-top:10px"><label class="f" for="cAddr">Address</label><input type="text" id="cAddr"></div>
+
+      <div class="rule" style="border-top:1px solid var(--line);margin:16px 0"></div>
+      <h2>Line items</h2>
+      <div class="itemhead"><span>Description</span><span>Qty</span><span>Unit price</span><span>Tax %</span><span></span></div>
+      <div class="items" id="items"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost sm" id="addItem">+ Add line</button>
+        <button class="btn ghost sm" id="applyTax">Apply default rate to all</button>
+      </div>
+
+      <div class="rule" style="border-top:1px solid var(--line);margin:16px 0"></div>
+      <h2>Notes</h2>
+      <div><label class="f" for="notes">Visible on the document</label><textarea id="notes" style="min-height:74px"></textarea></div>
+      <div style="margin-top:10px"><label class="f" for="terms">Payment terms</label><input type="text" id="terms"></div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost sm" id="reset">Load sample</button>
+        <button class="btn ghost sm" id="csv">Download CSV</button>
+        <button class="btn ghost sm" id="json">Download JSON</button>
+      </div>
+      <p class="note" style="margin-top:10px">All totals are calculated per line in integer cents, then rounded half-up. Nothing is sent anywhere.</p>
+    </section>
+
+    <section>
+      <div class="toolbar no-print">
+        <button class="btn" id="print">Print / Save as PDF</button>
+        <select id="pageSize" style="max-width:130px"><option value="a4">A4</option><option value="letter">US Letter</option></select>
+        <span class="sp"></span>
+        <span class="note" id="totalHint"></span>
+      </div>
+      <div class="paper-wrap">
+        <div class="print-root">
+          <article class="sheet" id="sheet">
+            <div class="brandbar"></div>
+            <div class="inv-head">
+              <div>
+                <div class="kind" id="pvKind">INVOICE</div>
+                <div style="font-size:11px;color:var(--ink2);margin-top:4px" id="pvSellerTop"></div>
+              </div>
+              <div class="meta">
+                <div><b id="pvNumber"></b></div>
+                <div>Issued <b id="pvIssue"></b></div>
+                <div id="pvDueLine">Due <b id="pvDue"></b></div>
+              </div>
+            </div>
+            <div class="parties">
+              <div class="party">
+                <div class="lbl">From</div>
+                <b id="pvSeller"></b>
+                <div id="pvSellerAddr"></div>
+                <div id="pvSellerEmail"></div>
+                <div id="pvSellerTax"></div>
+              </div>
+              <div class="party">
+                <div class="lbl">Bill to</div>
+                <b id="pvClient"></b>
+                <div id="pvClientAddr"></div>
+                <div id="pvClientTax"></div>
+              </div>
+            </div>
+            <table class="items-table">
+              <thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Unit</th><th class="num" id="thTax">VAT</th><th class="num">Amount</th></tr></thead>
+              <tbody id="pvItems"></tbody>
+            </table>
+            <table class="totals">
+              <tr><td>Subtotal</td><td class="num" id="pvSubtotal"></td></tr>
+              <tr id="pvDiscountRow"><td id="pvDiscountLabel">Discount</td><td class="num" id="pvDiscount"></td></tr>
+              <tbody id="pvTaxRows"></tbody>
+              <tr class="grand"><td>Total <span id="pvTotalLabel">due</span></td><td class="num" id="pvTotal"></td></tr>
+            </table>
+            <div class="words" id="pvWords"></div>
+            <div class="pay">
+              <div><b>Payment details</b><div id="pvBank"></div></div>
+              <div><b>Terms</b><div id="pvTerms"></div></div>
+            </div>
+            <div id="pvNotes" style="margin-top:12px;font-size:10px;color:var(--ink2)"></div>
+            <div class="foot"><span id="pvFootLeft"></span><span class="sp"></span><span>Page 1 of 1</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><span>Deterministic invoice and quotation generator. No network, no account, no AI model.</span><span class="sp"></span><a href="../">← All tools</a></footer>
+</div>
+<script src="../assets/base.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.T, $ = T.$, $$ = T.$$;
+  var KEY = "pk.invoice.v2";
+  var CUR = { GBP: { s: "£", name: "pound", sub: "pence" }, USD: { s: "$", name: "dollar", sub: "cent" },
+              EUR: { s: "€", name: "euro", sub: "cent" }, AUD: { s: "A$", name: "Australian dollar", sub: "cent" },
+              CAD: { s: "C$", name: "Canadian dollar", sub: "cent" } };
+
+  function todayISO() {
+    var d = new Date(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    var p = iso.split("-");
+    if (p.length !== 3) return iso;
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
+  }
+  function addDays(iso, n) {
+    var p = (iso || todayISO()).split("-");
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + (+n || 0)));
+    return d.toISOString().slice(0, 10);
+  }
+  function money(cents, cur) {
+    var s = CUR[cur] ? CUR[cur].s : "$";
+    var v = (Math.abs(cents) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (cents < 0 ? "-" : "") + s + v;
+  }
+  function cents(n) { return Math.round((Number(n) || 0) * 100); }
+
+  var ONES = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+  var TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  function under1000(n) {
+    var out = [];
+    if (n >= 100) { out.push(ONES[Math.floor(n / 100)] + " hundred"); n %= 100; if (n) out.push("and"); }
+    if (n < 20) { if (n) out.push(ONES[n]); }
+    else { out.push(TENS[Math.floor(n / 10)] + (n % 10 ? "-" + ONES[n % 10] : "")); }
+    return out.join(" ").replace(/\s+/g, " ").trim();
+  }
+  function intWords(n) {
+    if (n === 0) return "zero";
+    var scales = [[1e9, "billion"], [1e6, "million"], [1e3, "thousand"]], out = [];
+    for (var i = 0; i < scales.length; i++) {
+      var v = Math.floor(n / scales[i][0]);
+      if (v) { out.push(under1000(v) + " " + scales[i][1]); n %= scales[i][0]; }
+    }
+    if (n) out.push(under1000(n));
+    return out.join(" ");
+  }
+  function words(centsTotal, cur) {
+    var c = CUR[cur] || CUR.USD;
+    var whole = Math.floor(Math.abs(centsTotal) / 100), frac = Math.abs(centsTotal) % 100;
+    var unit = whole === 1 ? c.name : c.name + "s";
+    var out = intWords(whole) + " " + unit;
+    out += frac ? " and " + intWords(frac) + " " + c.sub : " and zero " + c.sub;
+    return out.charAt(0).toUpperCase() + out.slice(1);
+  }
+
+  var SAMPLE = {
+    kind: "invoice", currency: "GBP", number: "INV-2026-014", issue: todayISO(), days: 14,
+    taxMode: "vat", taxRate: 20, discount: 0,
+    seller: { name: "Northline Studio", email: "hello@northline.studio", addr: "14 Bridge Yard, Bristol BS1 4QH, United Kingdom", tax: "GB 412 887 093", bank: "Starling Bank · Sort 60-83-71 · Acc 20491837" },
+    client: { name: "Harbour & Co.", addr: "88 Queen Square, Bristol BS1 4NH", tax: "GB 228 991 407" },
+    items: [
+      { desc: "Brand identity — logo, colour, type system", qty: 1, price: 2400, rate: 20 },
+      { desc: "Landing page design and build", qty: 1, price: 1800, rate: 20 },
+      { desc: "Copywriting — 6 pages", qty: 6, price: 120, rate: 0 }
+    ],
+    notes: "Thank you — please quote the invoice number with your payment.",
+    terms: "Payment within 14 days. Late payments may incur 2% interest per month."
+  };
+
+  var state = load();
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) { var s = JSON.parse(raw); if (s && s.items) return s; }
+    } catch (e) {}
+    return clone(SAMPLE);
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  function bind(id, obj, key) {
+    var el = document.getElementById(id);
+    el.value = obj[key] == null ? "" : obj[key];
+    el.addEventListener("input", function () {
+      obj[key] = el.type === "number" ? Number(el.value) : el.value;
+      save(); render();
+    });
+  }
+
+  function renderItems() {
+    var box = $("#items");
+    box.innerHTML = "";
+    state.items.forEach(function (it, i) {
+      var row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML =
+        '<input type="text" data-i="' + i + '" data-k="desc" value="' + T.esc(it.desc) + '" placeholder="Description">' +
+        '<input type="number" data-i="' + i + '" data-k="qty" value="' + it.qty + '" min="0" step="0.25">' +
+        '<input type="number" data-i="' + i + '" data-k="price" value="' + it.price + '" min="0" step="0.01">' +
+        '<input type="number" data-i="' + i + '" data-k="rate" value="' + it.rate + '" min="0" max="100" step="0.01">' +
+        '<button class="x" data-del="' + i + '" title="Remove line">×</button>';
+      box.appendChild(row);
+    });
+  }
+
+  function calc() {
+    var subC = 0, netC = 0, rows = [], taxMap = {};
+    state.items.forEach(function (it) {
+      var g = cents((Number(it.qty) || 0) * (Number(it.price) || 0));
+      var n = Math.round(g * (100 - (Number(state.discount) || 0)) / 100);
+      var rate = state.taxMode === "none" ? 0 : (Number(it.rate) || 0);
+      var tax = Math.round(n * rate / 100);
+      subC += g; netC += n;
+      rows.push({ it: it, gross: g, net: n, rate: rate, tax: tax });
+      if (rate > 0) {
+        if (!taxMap[rate]) taxMap[rate] = { base: 0, tax: 0 };
+        taxMap[rate].base += n; taxMap[rate].tax += tax;
+      }
+    });
+    var discC = subC - netC, taxC = 0;
+    Object.keys(taxMap).forEach(function (r) { taxC += taxMap[r].tax; });
+    return { subC: subC, netC: netC, discC: discC, taxC: taxC, totalC: netC + taxC, rows: rows, taxMap: taxMap };
+  }
+
+  function render() {
+    var c = calc(), cur = state.currency, C = CUR[cur] || CUR.USD;
+    var isQuote = state.kind === "quote";
+    $("#pvKind").textContent = isQuote ? "QUOTATION" : "INVOICE";
+    $("#pvNumber").textContent = state.number || (isQuote ? "QUO-0001" : "INV-0001");
+    $("#pvIssue").textContent = fmtDate(state.issue);
+    $("#pvDueLine").innerHTML = (isQuote ? "Valid until <b>" : "Due <b>") + fmtDate(addDays(state.issue, isQuote ? 30 : state.days)) + "</b>";
+    $("#pvSellerTop").textContent = state.seller.name || "";
+    $("#pvSeller").textContent = state.seller.name || "Your business";
+    $("#pvSellerAddr").textContent = state.seller.addr || "";
+    $("#pvSellerEmail").textContent = state.seller.email || "";
+    $("#pvSellerTax").textContent = state.seller.tax ? (state.taxMode === "vat" ? "VAT " : "Tax ID ") + state.seller.tax : "";
+    $("#pvClient").textContent = state.client.name || "Client";
+    $("#pvClientAddr").textContent = state.client.addr || "";
+    $("#pvClientTax").textContent = state.client.tax ? (state.taxMode === "vat" ? "VAT " : "Tax ID ") + state.client.tax : "";
+    $("#thTax").textContent = state.taxMode === "vat" ? "VAT" : state.taxMode === "sales_tax" ? "Sales tax" : "Tax";
+
+    var tb = $("#pvItems"); tb.innerHTML = "";
+    c.rows.forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td>' + T.esc(r.it.desc || "—") + '</td>' +
+        '<td class="num">' + (Number(r.it.qty) || 0) + '</td>' +
+        '<td class="num">' + money(cents(r.it.price), cur) + '</td>' +
+        '<td class="num">' + (state.taxMode === "none" ? "—" : (Number(r.it.rate) || 0) + "%") + '</td>' +
+        '<td class="num">' + money(r.gross, cur) + '</td>';
+      tb.appendChild(tr);
+    });
+
+    $("#pvSubtotal").textContent = money(c.subC, cur);
+    var dRow = $("#pvDiscountRow");
+    if (c.discC > 0) { dRow.style.display = ""; $("#pvDiscountLabel").textContent = "Discount (" + (Number(state.discount) || 0) + "%)"; $("#pvDiscount").textContent = "−" + money(c.discC, cur); }
+    else dRow.style.display = "none";
+
+    var trs = $("#pvTaxRows"); trs.innerHTML = "";
+    Object.keys(c.taxMap).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (r) {
+      var label = state.taxMode === "vat" ? "VAT" : "Sales tax";
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td>' + label + ' ' + r + '% on ' + money(c.taxMap[r].base, cur) + '</td><td class="num">' + money(c.taxMap[r].tax, cur) + '</td>';
+      trs.appendChild(tr);
+    });
+    $("#pvTotalLabel").textContent = isQuote ? "quoted" : "due";
+    $("#pvTotal").textContent = money(c.totalC, cur);
+    $("#pvWords").textContent = words(c.totalC, cur) + ".";
+    $("#pvBank").textContent = state.seller.bank || "—";
+    $("#pvTerms").textContent = state.terms || (isQuote ? "Quotation valid for 30 days." : "Payment within " + state.days + " days.");
+    $("#pvNotes").textContent = state.notes || "";
+    $("#pvFootLeft").textContent = (state.seller.name || "Paperwork Kit") + " · " + (state.number || "");
+    $("#totalHint").textContent = money(c.totalC, cur) + (state.taxMode === "none" ? "" : " incl. " + money(c.taxC, cur) + " tax");
+    document.title = (isQuote ? "Quotation " : "Invoice ") + (state.number || "") + " — " + money(c.totalC, cur);
+  }
+
+  function attach() {
+    bind("kind", state, "kind");
+    bind("currency", state, "currency");
+    bind("number", state, "number");
+    bind("issue", state, "issue");
+    bind("days", state, "days");
+    bind("taxMode", state, "taxMode");
+    bind("taxRate", state, "taxRate");
+    bind("discount", state, "discount");
+    bind("terms", state, "terms");
+    bind("notes", state, "notes");
+    bind("sName", state.seller, "name");
+    bind("sEmail", state.seller, "email");
+    bind("sAddr", state.seller, "addr");
+    bind("sTax", state.seller, "tax");
+    bind("sBank", state.seller, "bank");
+    bind("cName", state.client, "name");
+    bind("cAddr", state.client, "addr");
+    bind("cTax", state.client, "tax");
+  }
+
+  $("#items").addEventListener("input", function (e) {
+    var el = e.target, i = el.getAttribute("data-i"), k = el.getAttribute("data-k");
+    if (i == null || !k) return;
+    state.items[+i][k] = el.type === "number" ? Number(el.value) : el.value;
+    save(); render();
+  });
+  $("#items").addEventListener("click", function (e) {
+    var d = e.target.getAttribute("data-del");
+    if (d == null) return;
+    if (state.items.length <= 1) { T.toast("Keep at least one line"); return; }
+    state.items.splice(+d, 1); save(); renderItems(); render();
+  });
+  $("#addItem").addEventListener("click", function () {
+    state.items.push({ desc: "", qty: 1, price: 0, rate: state.taxMode === "none" ? 0 : Number(state.taxRate) || 0 });
+    save(); renderItems(); render();
+  });
+  $("#applyTax").addEventListener("click", function () {
+    var r = state.taxMode === "none" ? 0 : Number(state.taxRate) || 0;
+    state.items.forEach(function (it) { it.rate = r; });
+    save(); renderItems(); render(); T.toast("Applied " + r + "% to all lines");
+  });
+  $("#reset").addEventListener("click", function () {
+    state = clone(SAMPLE); state.issue = todayISO(); save();
+    attach(); renderItems(); render(); T.toast("Sample loaded");
+  });
+  $("#print").addEventListener("click", function () { window.print(); });
+  $("#pageSize").addEventListener("change", function (e) {
+    var letter = e.target.value === "letter";
+    $("#sheet").classList.toggle("letter", letter);
+    var st = document.getElementById("pageStyle");
+    if (!st) { st = document.createElement("style"); st.id = "pageStyle"; document.head.appendChild(st); }
+    st.textContent = "@page{size:" + (letter ? "letter" : "A4") + "}";
+  });
+  $("#csv").addEventListener("click", function () {
+    var c = calc();
+    var rows = [["number", "issued", "due", "client", "currency", "subtotal", "tax", "total"],
+      [state.number, state.issue, addDays(state.issue, state.days), state.client.name, state.currency, (c.subC / 100).toFixed(2), (c.taxC / 100).toFixed(2), (c.totalC / 100).toFixed(2)]];
+    T.download((state.number || "invoice") + ".csv", rows.map(function (r) { return r.map(function (v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n"), "text/csv;charset=utf-8");
+  });
+  $("#json").addEventListener("click", function () {
+    T.download((state.number || "invoice") + ".json", JSON.stringify(state, null, 2), "application/json");
+  });
+
+  attach();
+  renderItems();
+  render();
+  if (!$("#issue").value) { $("#issue").value = todayISO(); state.issue = $("#issue").value; save(); render(); }
+})();
+</script>
+</body>
+</html>

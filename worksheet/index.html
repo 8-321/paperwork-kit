@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>K-5 Worksheet Maker — printable math practice with answer key</title>
+<meta name="description" content="Pick a grade, operation and count. Generate a printable K-5 math worksheet and a matching answer key. Same seed, same sheet. No account, no upload.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23121624'/%3E%3Cpath d='M18 14h20l8 8v28H18z' fill='%23fff'/%3E%3Cpath d='M38 14v8h8' fill='%232f6fed'/%3E%3Cpath d='M24 30h16M24 36h16M24 42h10' stroke='%232f6fed' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="../assets/kit.css">
+<style>
+:root{--a:#18a06a}
+.hd h1{font-size:30px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.two,.three{grid-template-columns:1fr}}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar .sp{flex:1}
+.paper-wrap{margin-top:4px}
+.sheet .ws-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.sheet .ws-title{font-size:21px;font-weight:700;letter-spacing:-.02em}
+.sheet .ws-sub{font-size:10px;color:var(--ink2);margin-top:3px}
+.sheet .namebar{display:flex;gap:20px;font-size:10px;color:var(--ink2);margin:10px 0 14px}
+.sheet .namebar span{flex:1;border-bottom:1px solid #9aa3b3;padding-bottom:3px}
+.sheet .probs{display:grid;grid-template-columns:1fr 1fr;gap:20px 30px;margin-top:6px}
+.sheet .prob{display:flex;align-items:baseline;gap:8px;font:17px/1.5 "Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums}
+.sheet .prob .n{width:22px;color:#8b93a4;font-size:11px}
+.sheet .prob .q{white-space:nowrap}
+.sheet .prob .line{flex:1;border-bottom:1.5px dotted #7d8799;min-width:36px;height:22px}
+.sheet .keygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 22px;margin-top:8px}
+.sheet .key{font:13px/1.5 "Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums}
+.sheet .key b{color:#18a06a}
+.sheet .ans-title{font-size:18px;font-weight:700;margin-bottom:4px}
+
+
+
+@media screen{.paper-wrap .sheet{zoom:.74}}
+@media screen and (max-width:1250px){.paper-wrap .sheet{zoom:.64}}
+@media screen and (max-width:900px){.paper-wrap .sheet{zoom:.5}}
+@media print{.paper-wrap .sheet{zoom:1!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="../">← Paperwork Kit</a>
+    <span class="tag"><i></i>02 · K-5 Worksheet</span>
+    <span class="sp"></span><span>Deterministic by seed</span>
+  </div>
+
+  <div class="grid">
+    <section class="app card pad">
+      <h2>Worksheet setup</h2>
+      <div><label class="f" for="title">Title</label><input type="text" id="title" value="Math Practice"></div>
+      <div class="three" style="margin-top:10px">
+        <div><label class="f" for="grade">Grade</label><select id="grade"><option value="K">Kindergarten</option><option value="1">Grade 1</option><option value="2">Grade 2</option><option value="3">Grade 3</option><option value="4">Grade 4</option><option value="5">Grade 5</option></select></div>
+        <div><label class="f" for="op">Operation</label><select id="op"><option value="add">Addition</option><option value="sub">Subtraction</option><option value="mul">Multiplication</option><option value="div">Division</option><option value="mixed">Mixed</option></select></div>
+        <div><label class="f" for="count">Questions</label><select id="count"><option>12</option><option selected>20</option><option>24</option><option>30</option></select></div>
+      </div>
+      <div class="two" style="margin-top:10px">
+        <div><label class="f" for="seed">Seed (same seed = same sheet)</label><input type="text" id="seed" value="monday-set-a"></div>
+        <div><label class="f" for="columns">Layout</label><select id="columns"><option value="2">2 columns</option><option value="1">1 column</option></select></div>
+      </div>
+      <div class="two" style="margin-top:10px">
+        <div><label class="f" for="teacher">Teacher / class (optional)</label><input type="text" id="teacher" value=""></div>
+        <div><label class="f" for="note">Instruction line</label><input type="text" id="note" value="Show your working. Write the answer on the line."></div>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="regen">Regenerate</button>
+        <button class="btn ghost sm" id="print">Print / Save as PDF</button>
+        <button class="btn ghost sm" id="json">Download JSON</button>
+      </div>
+      <p class="note" style="margin-top:10px">The answer key is a second page. Division questions always divide exactly; subtraction never goes below zero.</p>
+    </section>
+
+    <section>
+      <div class="toolbar no-print"><span class="note" id="hint"></span></div>
+      <div class="paper-wrap">
+        <div class="print-root">
+          <article class="sheet" id="sheet1">
+            <div class="brandbar" style="background:#18a06a"></div>
+            <div class="ws-head">
+              <div><div class="ws-title" id="pvTitle">Math Practice</div><div class="ws-sub" id="pvSub"></div></div>
+              <div style="font-size:10px;color:var(--ink2);text-align:right" id="pvTeacher"></div>
+            </div>
+            <div class="namebar"><span>Name</span><span>Date</span><span>Score &nbsp; / &nbsp;<b id="pvScore"></b></span></div>
+            <div id="pvNote" style="font-size:10px;color:var(--ink2);margin-bottom:12px"></div>
+            <div class="probs" id="pvProbs"></div>
+            <div class="foot"><span id="pvFoot"></span><span class="sp"></span><span>Page 1 of 2</span></div>
+          </article>
+          <article class="sheet" id="sheet2">
+            <div class="brandbar" style="background:#18a06a"></div>
+            <div class="ans-title">Answer key</div>
+            <div class="ws-sub" id="pvKeySub"></div>
+            <div class="keygrid" id="pvKeys"></div>
+            <div class="foot"><span id="pvFoot2"></span><span class="sp"></span><span>Page 2 of 2</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer><span>Deterministic K-5 math worksheets. No network, no account, no AI model.</span><span class="sp"></span><a href="../">← All tools</a></footer>
+</div>
+<script src="../assets/base.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = window.T, $ = T.$;
+  var KEY = "pk.worksheet.v1";
+  var cfg = load();
+
+  function load() {
+    try { var r = localStorage.getItem(KEY); if (r) return JSON.parse(r); } catch (e) {}
+    return { title: "Math Practice", grade: "2", op: "mixed", count: 20, seed: "monday-set-a", columns: "2", teacher: "", note: "Show your working. Write the answer on the line." };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} }
+
+  function hash(str) {
+    var h = 2166136261 >>> 0;
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function rng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function ri(r, min, max) { return min + Math.floor(r() * (max - min + 1)); }
+
+  function makeProblem(r, grade, op) {
+    var max = grade === "K" ? 10 : grade === "1" ? 20 : grade === "2" ? 100 : grade === "3" ? 999 : grade === "4" ? 9999 : 99999;
+    var o = op === "mixed" ? ["add", "sub", "mul", "div"][ri(r, 0, 3)] : op;
+    var a, b, ans;
+    if (o === "add") {
+      a = ri(r, 0, max); b = ri(r, 0, Math.max(1, Math.floor(max / 2))); ans = a + b;
+    } else if (o === "sub") {
+      a = ri(r, 1, max); b = ri(r, 0, a); ans = a - b;
+    } else if (o === "mul") {
+      var top = grade === "K" ? 5 : grade === "1" ? 5 : grade === "2" ? 10 : grade === "3" ? 12 : 20;
+      a = ri(r, 1, top); b = ri(r, 1, grade === "K" || grade === "1" ? 5 : 12); ans = a * b;
+    } else {
+      var q = ri(r, 1, grade === "K" ? 5 : grade === "1" ? 7 : grade === "2" ? 10 : 12);
+      b = ri(r, 2, grade === "K" ? 5 : grade === "2" ? 9 : 12);
+      a = q * b; ans = q;
+    }
+    return { a: a, b: b, op: o, ans: ans };
+  }
+
+  function build() {
+    var r = rng(hash(cfg.title + "|" + cfg.grade + "|" + cfg.op + "|" + cfg.seed + "|" + cfg.count));
+    var out = [], seen = {};
+    var guard = 0;
+    while (out.length < Number(cfg.count) && guard++ < 5000) {
+      var p = makeProblem(r, cfg.grade, cfg.op);
+      var k = p.a + p.op + p.b;
+      if (seen[k]) continue;
+      seen[k] = 1; out.push(p);
+    }
+    return out;
+  }
+
+  function sym(op) { return op === "add" ? "+" : op === "sub" ? "−" : op === "mul" ? "×" : "÷"; }
+  function label() {
+    var g = { K: "Kindergarten", "1": "Grade 1", "2": "Grade 2", "3": "Grade 3", "4": "Grade 4", "5": "Grade 5" }[cfg.grade] || "Grade 2";
+    var o = { add: "addition", sub: "subtraction", mul: "multiplication", div: "division", mixed: "mixed operations" }[cfg.op] || "practice";
+    return g + " · " + o;
+  }
+
+  function render() {
+    var probs = build(), cols = cfg.columns === "1" ? 1 : 2;
+    $("#pvTitle").textContent = cfg.title || "Math Practice";
+    $("#pvSub").textContent = label() + " · " + probs.length + " questions";
+    $("#pvTeacher").textContent = cfg.teacher || "";
+    $("#pvNote").textContent = cfg.note || "";
+    $("#pvScore").textContent = probs.length;
+    $("#pvFoot").textContent = (cfg.title || "Math Practice") + " · seed " + cfg.seed;
+    $("#pvKeySub").textContent = (cfg.title || "Math Practice") + " · " + label();
+    $("#pvFoot2").textContent = "Answer key · seed " + cfg.seed;
+
+    var box = $("#pvProbs"); box.innerHTML = ""; box.style.gridTemplateColumns = "repeat(" + cols + ",1fr)";
+    probs.forEach(function (p, i) {
+      var d = document.createElement("div");
+      d.className = "prob";
+      d.innerHTML = '<span class="n">' + (i + 1) + '.</span><span class="q">' + p.a + " " + sym(p.op) + " " + p.b + " =</span><span class='line'></span>";
+      box.appendChild(d);
+    });
+
+    var kb = $("#pvKeys"); kb.innerHTML = "";
+    probs.forEach(function (p, i) {
+      var d = document.createElement("div");
+      d.className = "key";
+      d.innerHTML = (i + 1) + ". " + p.a + " " + sym(p.op) + " " + p.b + " = <b>" + p.ans + "</b>";
+      kb.appendChild(d);
+    });
+
+    $("#hint").textContent = probs.length + " questions · " + label() + " · answer key included";
+    document.title = (cfg.title || "Math Practice") + " — " + label();
+  }
+
+  function bind(id, key) {
+    var el = document.getElementById(id);
+    el.value = cfg[key] == null ? "" : cfg[key];
+    el.addEventListener("input", function () { cfg[key] = el.value; save(); render(); });
+    el.addEventListener("change", function () { cfg[key] = el.value; save(); render(); });
+  }
+
+  ["title", "grade", "op", "count", "seed", "columns", "teacher", "note"].forEach(function (k) { bind(k, k); });
+  $("#regen").addEventListener("click", function () {
+    cfg.seed = "set-" + Math.random().toString(36).slice(2, 7);
+    $("#seed").value = cfg.seed; save(); render(); T.toast("New sheet: " + cfg.seed);
+  });
+  $("#print").addEventListener("click", function () { window.print(); });
+  $("#json").addEventListener("click", function () {
+    T.download("worksheet-" + cfg.seed + ".json", JSON.stringify({ config: cfg, problems: build() }, null, 2), "application/json");
+  });
+  render();
+})();
+</script>
+</body>
+</html>
